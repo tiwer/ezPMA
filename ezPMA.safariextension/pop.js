@@ -3,6 +3,7 @@ var account = {
     load:function(){},
     save:function(arr){},
     go:function(id){},
+    visit:function(acc){},
 }
 
 account.load = function(){
@@ -19,10 +20,9 @@ account.save = function(arr){
     localStorage.setItem("com.yxgz.ezPMA.account",JSON.stringify(arr));
 }
 
-account.go = function(id){
-    var acc = account.load()[id];
+account.open = function(acc){
     var tab = safari.application.activeBrowserWindow.openTab("foreground",0);
-
+    
     var onPageLoaded = function(msgEvent){
         if(msgEvent.name=="ezPMA_injected"){
             tab.page.dispatchMessage("ezPMA_login",acc);
@@ -33,6 +33,11 @@ account.go = function(id){
     tab.addEventListener("message",onPageLoaded,false);
     
     safari.application.activeBrowserWindow.activeTab.url=acc.url;
+}
+
+account.go = function(id){
+    var acc = account.load()[id];
+    account.open(acc);
 }
 
 var mainController = {
@@ -135,7 +140,14 @@ editController.save = function(){
 }
 
 editController.test = function(){
-    account.go(editController._id);
+    var acc = new Object();
+    acc.title = $("#edit_title").val();
+    acc.remarks = $("#edit_remarks").val();
+    acc.url = $("#edit_url").val();
+    acc.username = $("#edit_username").val();
+    acc.password = $("#edit_password").val();
+
+    account.open(acc);
 }
 
 detailController.load = function(id){
